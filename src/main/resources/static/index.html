@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JWT SSO Demo</title>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+        function login(){
+            var username = $("#username").val();
+            var password = $("#password").val();
+            var params = "username="+username+"&password="+password;
+            $.ajax({
+                'url' : '/login',
+                'data' : params,
+                'method' : 'POST',
+                'success' : function(data){
+                    if(data.code == 200){
+                        var token = data.token;
+                        var localStorage = window.localStorage;
+                        localStorage.token = token;
+                        $("#msg").val(data.message)
+                    }else{
+                        $("#msg").val(data.message)
+                    }
+                }
+            });
+        }
+
+        function setHeader(xhr){
+            xhr.setRequestHeader("Authorization",window.localStorage.token);
+        }
+
+        function test(){
+            $.ajax({
+                'url' : '/test',
+                'method' : 'GET',
+                'success' : function(data){
+                    if(data.code == 200){
+                        window.localStorage.token = data.token;
+                        $("#msg").val("请求/test 验证通过!");
+                    }else{
+                        $("#msg").val(data.message);
+                    }
+                },
+                'beforeSend' : setHeader
+            });
+        }
+    </script>
+</head>
+<body>
+
+    <table style="align: center">
+        <caption>登录测试</caption>
+        <tr>
+            <td style="text-align: right; padding-right: 5px">
+                登录名：
+            </td>
+            <td style="text-align: left; padding-left: 5px">
+                <input type="text" name="username" id="username"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right; padding-right: 5px">
+                密码：
+            </td>
+            <td style="text-align: left; padding-left: 5px">
+                <input type="text" name="password" id="password"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right; padding-right: 5px" colspan="2">
+                <input type="button" value="登录" onclick="login();" />
+            </td>
+        </tr>
+    </table>
+    <input type="button" value="JWT TEST" onclick="test();"/>
+    <input type="text" id="msg" style="font-size: 12px"/>
+</body>
+</html>
